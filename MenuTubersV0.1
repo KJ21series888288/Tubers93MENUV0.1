@@ -1,7 +1,6 @@
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local UIS = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
 local Lighting = game:GetService("Lighting")
 
 ------------------------------------------------
@@ -21,17 +20,18 @@ Tubers93MENU.ZIndexBehavior = Enum.ZIndexBehavior.Global
 ------------------------------------------------
 
 local Open = Instance.new("ImageButton")
+
 Open.Parent = Tubers93MENU
 Open.Size = UDim2.new(0,100,0,80)
 Open.Position = UDim2.new(0.5,-50,0,20)
 Open.Image = "rbxassetid://140539405777351"
 Open.BackgroundTransparency = 1
-Open.ZIndex = 999999
+Open.ZIndex = 10
 
 Instance.new("UICorner",Open)
 
 ------------------------------------------------
--- FRAME
+-- MAIN FRAME
 ------------------------------------------------
 
 local Frame = Instance.new("Frame")
@@ -39,8 +39,9 @@ Frame.Parent = Tubers93MENU
 Frame.Size = UDim2.new(0,650,0,360)
 Frame.Position = UDim2.new(0.5,-325,0.35,0)
 Frame.BackgroundColor3 = Color3.fromRGB(20,20,20)
+Frame.BackgroundTransparency = 0.2
 Frame.Visible = false
-Frame.ZIndex = 999999
+Frame.ZIndex = 1
 
 Instance.new("UICorner",Frame)
 
@@ -51,11 +52,13 @@ Instance.new("UICorner",Frame)
 local Title = Instance.new("TextLabel")
 Title.Parent = Frame
 Title.Size = UDim2.new(1,0,0,45)
+Title.Position = UDim2.new(0,0,0,0)
 Title.Text = "TUBERS93 MENU HACK"
 Title.Font = Enum.Font.Bangers
 Title.TextScaled = true
 Title.TextColor3 = Color3.fromRGB(255,0,0)
 Title.BackgroundTransparency = 1
+Title.ZIndex = 5
 
 ------------------------------------------------
 -- DRAG
@@ -104,13 +107,14 @@ local function createButton(text,pos,parent)
 
 	local b = Instance.new("TextButton")
 	b.Parent = parent
-	b.Size = UDim2.new(0,160,0,45)
+	b.Size = UDim2.new(0,150,0,40)
 	b.Position = pos
 	b.Text = text
 	b.Font = Enum.Font.SourceSansBold
 	b.TextScaled = true
 	b.BackgroundColor3 = Color3.fromRGB(255,0,0)
 	b.TextColor3 = Color3.new(1,1,1)
+	b.ZIndex = 10
 
 	Instance.new("UICorner",b)
 
@@ -119,34 +123,38 @@ local function createButton(text,pos,parent)
 end
 
 ------------------------------------------------
--- CATEGORIES
+-- CATEGORY BUTTONS
 ------------------------------------------------
 
 local PlayerCat = createButton("Player",UDim2.new(0,20,0,50),Frame)
-local VisualCat = createButton("Visual",UDim2.new(0,180,0,50),Frame)
-local CombatCat = createButton("Combat",UDim2.new(0,340,0,50),Frame)
-local SongCat = createButton("Song",UDim2.new(0,500,0,50),Frame)
+local VisualCat = createButton("Visual",UDim2.new(0,190,0,50),Frame)
+local CombatCat = createButton("Combat",UDim2.new(0,360,0,50),Frame)
+local SongCat = createButton("Song",UDim2.new(0,520,0,50),Frame)
 
 ------------------------------------------------
 -- TABS
 ------------------------------------------------
 
-local PlayerTab = Instance.new("Frame")
-PlayerTab.Parent = Frame
-PlayerTab.Size = UDim2.new(1,0,1,-110)
-PlayerTab.Position = UDim2.new(0,0,0,110)
-PlayerTab.BackgroundTransparency = 1
+local function createTab()
 
-local VisualTab = PlayerTab:Clone()
-VisualTab.Parent = Frame
+	local tab = Instance.new("Frame")
+	tab.Parent = Frame
+	tab.Size = UDim2.new(1,0,1,-120)
+	tab.Position = UDim2.new(0,0,0,120)
+	tab.BackgroundTransparency = 1
+	tab.ZIndex = 5
+
+	return tab
+
+end
+
+local PlayerTab = createTab()
+local VisualTab = createTab()
+local CombatTab = createTab()
+local SongTab = createTab()
+
 VisualTab.Visible = false
-
-local CombatTab = PlayerTab:Clone()
-CombatTab.Parent = Frame
 CombatTab.Visible = false
-
-local SongTab = PlayerTab:Clone()
-SongTab.Parent = Frame
 SongTab.Visible = false
 
 local function hideTabs()
@@ -186,13 +194,13 @@ local InfJumpButton = createButton("Infinite Jump",UDim2.new(0,20,0,10),PlayerTa
 
 local SpeedBox = Instance.new("TextBox")
 SpeedBox.Parent = PlayerTab
-SpeedBox.Size = UDim2.new(0,160,0,45)
+SpeedBox.Size = UDim2.new(0,150,0,40)
 SpeedBox.Position = UDim2.new(0,200,0,10)
 SpeedBox.PlaceholderText = "Speed"
-SpeedBox.Text = ""
 SpeedBox.TextScaled = true
 SpeedBox.BackgroundColor3 = Color3.fromRGB(255,0,0)
 SpeedBox.TextColor3 = Color3.new(1,1,1)
+SpeedBox.ZIndex = 10
 
 Instance.new("UICorner",SpeedBox)
 
@@ -214,9 +222,7 @@ local VoiceLoopButton = createButton("Tubers93VoiceLoop",UDim2.new(0,200,0,10),S
 ------------------------------------------------
 
 Open.MouseButton1Click:Connect(function()
-
 	Frame.Visible = not Frame.Visible
-
 end)
 
 ------------------------------------------------
@@ -266,9 +272,7 @@ SpeedBox.FocusLost:Connect(function()
 	local num = tonumber(SpeedBox.Text)
 
 	if num and player.Character then
-
 		player.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = num
-
 	end
 
 end)
