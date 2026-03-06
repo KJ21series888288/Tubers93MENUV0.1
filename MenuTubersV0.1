@@ -1,433 +1,257 @@
+--// SERVICES
 local Players = game:GetService("Players")
-local player = Players.LocalPlayer
 local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
-local Lighting = game:GetService("Lighting")
-local camera = workspace.CurrentCamera
+local player = Players.LocalPlayer
+local mouse = player:GetMouse()
 
-------------------------------------------------
--- GUI
-------------------------------------------------
+--// GUI
+local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+gui.ResetOnSpawn = false
 
-local Tubers93MENU = Instance.new("ScreenGui")
-Tubers93MENU.Name = "Tubers93MENU"
-Tubers93MENU.Parent = player:WaitForChild("PlayerGui")
-Tubers93MENU.ResetOnSpawn = false
-Tubers93MENU.DisplayOrder = 999999999
-Tubers93MENU.IgnoreGuiInset = true
-Tubers93MENU.ZIndexBehavior = Enum.ZIndexBehavior.Global
-
-------------------------------------------------
 -- OPEN BUTTON
-------------------------------------------------
+local open = Instance.new("TextButton")
+open.Parent = gui
+open.Size = UDim2.new(0,120,0,40)
+open.Position = UDim2.new(0,20,0,200)
+open.Text = "Open Menu"
+open.BackgroundColor3 = Color3.fromRGB(30,30,30)
+open.TextColor3 = Color3.new(1,1,1)
 
-local Open = Instance.new("ImageButton")
-Open.Parent = Tubers93MENU
-Open.Size = UDim2.new(0,100,0,80)
-Open.Position = UDim2.new(0.5,-50,0,20)
-Open.Image = "rbxassetid://140539405777351"
-Open.BackgroundTransparency = 1
-Open.ZIndex = 9999
-Instance.new("UICorner",Open)
+-- MAIN FRAME
+local frame = Instance.new("Frame")
+frame.Parent = gui
+frame.Size = UDim2.new(0,400,0,300)
+frame.Position = UDim2.new(0.5,-200,0.5,-150)
+frame.BackgroundColor3 = Color3.fromRGB(20,20,20)
+frame.Visible = false
 
-------------------------------------------------
--- DRAG OPEN BUTTON
-------------------------------------------------
+-- DRAG SYSTEM
+local function makeDraggable(obj)
+	local dragging=false
+	local dragInput
+	local dragStart
+	local startPos
 
-local dragOpen = false
-local dragStart
-local startPos
+	obj.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			dragging=true
+			dragStart=input.Position
+			startPos=obj.Position
 
-Open.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		dragOpen = true
-		dragStart = input.Position
-		startPos = Open.Position
-	end
+			input.Changed:Connect(function()
+				if input.UserInputState==Enum.UserInputState.End then
+					dragging=false
+				end
+			end)
+		end
+	end)
+
+	obj.InputChanged:Connect(function(input)
+		if input.UserInputType==Enum.UserInputType.MouseMovement then
+			dragInput=input
+		end
+	end)
+
+	UIS.InputChanged:Connect(function(input)
+		if input==dragInput and dragging then
+			local delta=input.Position-dragStart
+			obj.Position=UDim2.new(startPos.X.Scale,startPos.X.Offset+delta.X,startPos.Y.Scale,startPos.Y.Offset+delta.Y)
+		end
+	end)
+end
+
+makeDraggable(frame)
+makeDraggable(open)
+
+open.MouseButton1Click:Connect(function()
+	frame.Visible = not frame.Visible
 end)
 
-UIS.InputEnded:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		dragOpen = false
-	end
-end)
+--// TAB HOLDER
+local tabHolder = Instance.new("Frame",frame)
+tabHolder.Size = UDim2.new(0,120,1,0)
+tabHolder.BackgroundColor3 = Color3.fromRGB(30,30,30)
 
-UIS.InputChanged:Connect(function(input)
+local pageHolder = Instance.new("Frame",frame)
+pageHolder.Position = UDim2.new(0,120,0,0)
+pageHolder.Size = UDim2.new(1,-120,1,0)
+pageHolder.BackgroundTransparency = 1
 
-	if dragOpen and input.UserInputType == Enum.UserInputType.MouseMovement then
+local pages = {}
 
-		local delta = input.Position - dragStart
+local function createPage(name)
+	local btn = Instance.new("TextButton",tabHolder)
+	btn.Size = UDim2.new(1,0,0,40)
+	btn.Text = name
+	btn.BackgroundColor3 = Color3.fromRGB(40,40,40)
+	btn.TextColor3 = Color3.new(1,1,1)
 
-		Open.Position = UDim2.new(
-			startPos.X.Scale,
-			startPos.X.Offset + delta.X,
-			startPos.Y.Scale,
-			startPos.Y.Offset + delta.Y
-		)
+	local page = Instance.new("Frame",pageHolder)
+	page.Size = UDim2.new(1,0,1,0)
+	page.Visible = false
+	page.BackgroundTransparency = 1
 
-	end
+	btn.MouseButton1Click:Connect(function()
+		for _,p in pairs(pages) do
+			p.Visible=false
+		end
+		page.Visible=true
+	end)
 
-end)
+	table.insert(pages,page)
+	return page
+end
 
-------------------------------------------------
--- FRAME
-------------------------------------------------
+-- PAGES
+local playerPage = createPage("Player")
+local visualPage = createPage("Visual")
+local combatPage = createPage("Combat")
+local songPage = createPage("Song")
 
-local Frame = Instance.new("Frame")
-Frame.Parent = Tubers93MENU
-Frame.Size = UDim2.new(0,650,0,380)
-Frame.Position = UDim2.new(0.5,-325,0.3,0)
-Frame.BackgroundColor3 = Color3.fromRGB(0,0,0)
-Frame.BackgroundTransparency = 0.25
-Frame.Visible = false
-Frame.ZIndex = 1
-Instance.new("UICorner",Frame)
+playerPage.Visible = true
 
-------------------------------------------------
--- TITLE
-------------------------------------------------
-
-local Title = Instance.new("TextLabel")
-Title.Parent = Frame
-Title.Size = UDim2.new(1,0,0,40)
-Title.Text = "Tubers93 Menu Hack"
-Title.Font = Enum.Font.Bangers
-Title.TextScaled = true
-Title.TextColor3 = Color3.fromRGB(255,0,0)
-Title.BackgroundTransparency = 1
-Title.ZIndex = 10
-
-------------------------------------------------
--- DRAG MENU
-------------------------------------------------
-
-local dragging = false
-local dragStart2
-local startPos2
-
-Frame.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		dragging = true
-		dragStart2 = input.Position
-		startPos2 = Frame.Position
-	end
-end)
-
-UIS.InputEnded:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		dragging = false
-	end
-end)
-
-UIS.InputChanged:Connect(function(input)
-
-	if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-
-		local delta = input.Position - dragStart2
-
-		Frame.Position = UDim2.new(
-			startPos2.X.Scale,
-			startPos2.X.Offset + delta.X,
-			startPos2.Y.Scale,
-			startPos2.Y.Offset + delta.Y
-		)
-
-	end
-
-end)
-
-------------------------------------------------
 -- BUTTON CREATOR
-------------------------------------------------
-
-local function createButton(text,pos,parent)
-
-	local b = Instance.new("TextButton")
-	b.Parent = parent
-	b.Size = UDim2.new(0,150,0,40)
-	b.Position = pos
+local function createButton(parent,text,posY,callback)
+	local b = Instance.new("TextButton",parent)
+	b.Size = UDim2.new(0,200,0,40)
+	b.Position = UDim2.new(0,10,0,posY)
 	b.Text = text
-	b.Font = Enum.Font.SourceSansBold
-	b.TextScaled = true
-	b.BackgroundColor3 = Color3.fromRGB(255,0,0)
+	b.BackgroundColor3 = Color3.fromRGB(50,50,50)
 	b.TextColor3 = Color3.new(1,1,1)
-	b.ZIndex = 20
-	Instance.new("UICorner",b)
-
+	b.MouseButton1Click:Connect(callback)
 	return b
-
 end
 
-------------------------------------------------
--- TABS
-------------------------------------------------
-
-local PlayerTab = Instance.new("Frame",Frame)
-PlayerTab.Size = UDim2.new(1,0,1,-80)
-PlayerTab.Position = UDim2.new(0,0,0,80)
-PlayerTab.BackgroundTransparency = 1
-PlayerTab.ZIndex = 10
-
-local VisualTab = PlayerTab:Clone()
-VisualTab.Parent = Frame
-VisualTab.Visible = false
-
-local CombatTab = PlayerTab:Clone()
-CombatTab.Parent = Frame
-CombatTab.Visible = false
-
-local SongTab = PlayerTab:Clone()
-SongTab.Parent = Frame
-SongTab.Visible = false
-
-------------------------------------------------
--- CATEGORY BUTTONS
-------------------------------------------------
-
-local PlayerCat = createButton("Player",UDim2.new(0,10,0,45),Frame)
-local VisualCat = createButton("Visual",UDim2.new(0,170,0,45),Frame)
-local CombatCat = createButton("Combat",UDim2.new(0,330,0,45),Frame)
-local SongCat = createButton("Song",UDim2.new(0,490,0,45),Frame)
-
-local function hideTabs()
-	PlayerTab.Visible=false
-	VisualTab.Visible=false
-	CombatTab.Visible=false
-	SongTab.Visible=false
+-- TEXTBOX
+local function createBox(parent,placeholder,posY)
+	local box = Instance.new("TextBox",parent)
+	box.Size = UDim2.new(0,200,0,40)
+	box.Position = UDim2.new(0,10,0,posY)
+	box.PlaceholderText = placeholder
+	box.BackgroundColor3 = Color3.fromRGB(50,50,50)
+	box.TextColor3 = Color3.new(1,1,1)
+	return box
 end
 
-PlayerCat.MouseButton1Click:Connect(function()
-	hideTabs()
-	PlayerTab.Visible=true
-end)
+--// PLAYER FEATURES
 
-VisualCat.MouseButton1Click:Connect(function()
-	hideTabs()
-	VisualTab.Visible=true
-end)
-
-CombatCat.MouseButton1Click:Connect(function()
-	hideTabs()
-	CombatTab.Visible=true
-end)
-
-SongCat.MouseButton1Click:Connect(function()
-	hideTabs()
-	SongTab.Visible=true
-end)
-
-------------------------------------------------
--- OPEN MENU
-------------------------------------------------
-
-Open.MouseButton1Click:Connect(function()
-	Frame.Visible = not Frame.Visible
-end)
-
-------------------------------------------------
 -- INFINITE JUMP
-------------------------------------------------
-
 local infJump=false
-
-local InfJumpBtn=createButton("Infinite Jump",UDim2.new(0,20,0,20),PlayerTab)
-
-InfJumpBtn.MouseButton1Click:Connect(function()
+createButton(playerPage,"Infinite Jump",10,function()
 	infJump = not infJump
 end)
 
 UIS.JumpRequest:Connect(function()
 	if infJump then
-		local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
-		if hum then
-			hum:ChangeState(Enum.HumanoidStateType.Jumping)
-		end
+		player.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
 	end
 end)
 
-------------------------------------------------
--- SPEED
-------------------------------------------------
-
-local SpeedBox = Instance.new("TextBox")
-SpeedBox.Parent = PlayerTab
-SpeedBox.Size = UDim2.new(0,150,0,40)
-SpeedBox.Position = UDim2.new(0,200,0,20)
-SpeedBox.PlaceholderText="Speed"
-SpeedBox.Text=""
-SpeedBox.TextScaled=true
-SpeedBox.BackgroundColor3=Color3.fromRGB(255,0,0)
-SpeedBox.TextColor3=Color3.new(1,1,1)
-SpeedBox.ZIndex=20
-Instance.new("UICorner",SpeedBox)
-
-SpeedBox.FocusLost:Connect(function()
-
-	local num=tonumber(SpeedBox.Text)
-
-	if num then
-		local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
-		if hum then
-			hum.WalkSpeed=num
-		end
-	end
-
+-- NOCLIP
+local noclip=false
+createButton(playerPage,"Noclip",60,function()
+	noclip = not noclip
 end)
 
-------------------------------------------------
--- ESP
-------------------------------------------------
-
-local esp=false
-local EspBtn=createButton("ESP",UDim2.new(0,20,0,20),VisualTab)
-
-EspBtn.MouseButton1Click:Connect(function()
-
-	esp = not esp
-
-	for _,p in pairs(Players:GetPlayers()) do
-
-		if p ~= player and p.Character then
-
-			local char=p.Character
-
-			if esp then
-
-				local h=Instance.new("Highlight")
-				h.FillTransparency=1
-				h.OutlineColor=Color3.new(1,0,0)
-				h.Parent=char
-
-			else
-
-				for _,v in pairs(char:GetChildren()) do
-					if v:IsA("Highlight") then
-						v:Destroy()
-					end
-				end
-
+RunService.Stepped:Connect(function()
+	if noclip and player.Character then
+		for _,v in pairs(player.Character:GetDescendants()) do
+			if v:IsA("BasePart") then
+				v.CanCollide=false
 			end
-
 		end
-
 	end
-
 end)
 
-------------------------------------------------
+-- SPEED
+local speedBox = createBox(playerPage,"Speed",110)
+
+speedBox.FocusLost:Connect(function()
+	local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+	if hum then
+		hum.WalkSpeed = tonumber(speedBox.Text) or 16
+	end
+end)
+
+--// VISUAL
+
 -- FULLBRIGHT
-------------------------------------------------
-
-local fb=false
-local FullBrightBtn=createButton("FullBright",UDim2.new(0,200,0,20),VisualTab)
-
-FullBrightBtn.MouseButton1Click:Connect(function()
-
-	fb = not fb
-
-	if fb then
-		Lighting.Brightness=3
-		Lighting.ClockTime=12
+local full=false
+createButton(visualPage,"FullBright",10,function()
+	full = not full
+	if full then
+		game.Lighting.Brightness = 5
+		game.Lighting.ClockTime = 12
 	else
-		Lighting.Brightness=1
+		game.Lighting.Brightness = 1
 	end
-
 end)
 
-------------------------------------------------
--- CAMLOCK (COMBAT)
-------------------------------------------------
+-- ESP / TRACERS
+local esp=false
+createButton(visualPage,"ESP/Tracers",60,function()
+	esp = not esp
+	for _,plr in pairs(Players:GetPlayers()) do
+		if plr ~= player and plr.Character then
+			if esp then
+				local hl = Instance.new("Highlight",plr.Character)
+				hl.FillTransparency = 1
+				hl.OutlineColor = Color3.new(1,0,0)
+			else
+				if plr.Character:FindFirstChild("Highlight") then
+					plr.Character.Highlight:Destroy()
+				end
+			end
+		end
+	end
+end)
+
+--// COMBAT
 
 local camlock=false
-local holding=false
+local target=nil
 
-local CamlockBtn=createButton("Camlock",UDim2.new(0,20,0,20),CombatTab)
-
-CamlockBtn.MouseButton1Click:Connect(function()
+createButton(combatPage,"Camlock",10,function()
 	camlock = not camlock
 end)
 
-UIS.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton2 then
-		holding=true
-	end
-end)
-
-UIS.InputEnded:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton2 then
-		holding=false
+mouse.Button1Down:Connect(function()
+	if camlock then
+		local t = mouse.Target
+		if t and t.Parent:FindFirstChild("Humanoid") then
+			target = t.Parent
+		end
 	end
 end)
 
 RunService.RenderStepped:Connect(function()
-
-	if camlock and holding then
-
-		local closest
-		local dist=math.huge
-
-		for _,p in pairs(Players:GetPlayers()) do
-
-			if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-
-				local pos,visible = camera:WorldToViewportPoint(p.Character.HumanoidRootPart.Position)
-
-				if visible then
-
-					local mag=(Vector2.new(pos.X,pos.Y)-camera.ViewportSize/2).Magnitude
-
-					if mag < dist then
-						dist = mag
-						closest = p
-					end
-
-				end
-
-			end
-
-		end
-
-		if closest and closest.Character then
-
-			camera.CFrame = CFrame.new(
-				camera.CFrame.Position,
-				closest.Character.HumanoidRootPart.Position
-			)
-
-		end
-
+	if camlock and target and target:FindFirstChild("HumanoidRootPart") then
+		local cam = workspace.CurrentCamera
+		cam.CFrame = CFrame.new(cam.CFrame.Position,target.HumanoidRootPart.Position)
 	end
-
 end)
 
-------------------------------------------------
--- SONG
-------------------------------------------------
+--// SONG
 
 local sound = Instance.new("Sound")
-sound.SoundId="rbxassetid://132225475210716"
-sound.Volume=2
-sound.Parent=workspace
+sound.SoundId = "rbxassetid://132225475210716"
+sound.Parent = workspace
 
-local SongBtn=createButton("Tubers93Voice",UDim2.new(0,20,0,20),SongTab)
-local LoopBtn=createButton("Tubers93VoiceLoop",UDim2.new(0,200,0,20),SongTab)
-
-SongBtn.MouseButton1Click:Connect(function()
+-- PLAY ONCE
+createButton(songPage,"Tubers93Voice",10,function()
 	sound.Looped=false
 	sound:Play()
 end)
 
+-- LOOP TOGGLE
 local loop=false
-
-LoopBtn.MouseButton1Click:Connect(function()
-
+createButton(songPage,"Tubers93VoiceLoop",60,function()
 	loop = not loop
-	sound.Looped = loop
-
+	sound.Looped=loop
 	if loop then
 		sound:Play()
 	else
 		sound:Stop()
 	end
-
 end)
